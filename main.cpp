@@ -12,7 +12,7 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 get some text displaying
-get a sprite displaying
+get a sprite displaying - DONE
 get a sound playing
 get joystick controlling bob
 get keyboard also controlling bob
@@ -25,10 +25,16 @@ get the game working
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
+static SDL_Texture *texture = NULL;
+static int texture_width = 0;
+static int texture_height = 0;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
+    SDL_Surface *surface = NULL;
+    char *bmp_path = NULL;
+
     SDL_SetAppMetadata("Oily Bob", "1.0", "com.jamibaraki.oilybob");
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -41,6 +47,30 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
     SDL_SetRenderLogicalPresentation(renderer, 640, 480, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+
+    // load the graphics
+    SDL_asprintf(&bmp_path, "%sgraphics/bee.bmp", SDL_GetBasePath());  /* allocate a string of the full file path */
+    surface = SDL_LoadBMP(bmp_path);
+    if (!surface) {
+        SDL_Log("Couldn't load png: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    SDL_free(bmp_path);
+
+    texture_width = surface->w;
+    texture_height = surface->h;
+
+    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (!texture) {
+        SDL_Log("Couldn't create static texture: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    SDL_DestroySurface(surface);
+
+
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -59,11 +89,24 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 /* This function runs once per frame, and is the heart of the program. */
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
+    SDL_FRect dst_rect;
     const double now = ((double)SDL_GetTicks()) / 1000.0;  /* convert from milliseconds to seconds. */
     SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE_FLOAT);  /* new color, full alpha. */
 
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
+
+
+
+    //dst_rect.x = (100.0f * scale);
+    dst_rect.x = 100.0f;
+    dst_rect.y = 0.0f;
+    dst_rect.w = (float) texture_width;
+    dst_rect.h = (float) texture_height;
+    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
+
+
+
 
     /* put the newly-cleared rendering on the screen. */
     SDL_RenderPresent(renderer);
@@ -76,5 +119,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 /* This function runs once at shutdown. */
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
+    SDL_DestroyTexture(texture);
     /* SDL will clean up the window/renderer for us. */
 }
