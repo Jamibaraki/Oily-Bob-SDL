@@ -5,6 +5,7 @@ using namespace std;
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include "entity.cpp"
 
 
 /**
@@ -29,6 +30,8 @@ static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 static int texture_width = 0;
 static int texture_height = 0;
+
+Entity bee;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -79,6 +82,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+
+    bee.xPos = 100;
+    bee.yPos = 150;
+    bee.texture = texture;
+
     SDL_DestroySurface(surface);
 
 
@@ -109,12 +117,13 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
 
-    //dst_rect.x = (100.0f * scale);
-    dst_rect.x = 100.0f;
-    dst_rect.y = 0.0f;
+
+    //dst_rect.x = 100.0f;
+    dst_rect.x = bee.xPos;
+    dst_rect.y = bee.yPos;
     dst_rect.w = (float) texture_width;
     dst_rect.h = (float) texture_height;
-    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
+    SDL_RenderTexture(renderer, bee.texture, NULL, &dst_rect);
 
 
 
