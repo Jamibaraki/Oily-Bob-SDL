@@ -5,4 +5,6 @@ class Entity {
         int xPos;
         int yPos;
         SDL_Texture *texture;
+        int width;
+        int height;
 };

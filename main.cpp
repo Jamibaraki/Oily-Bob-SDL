@@ -6,7 +6,7 @@ using namespace std;
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include "entity.cpp"
-
+#include "main.h"
 
 /**
 Oily Bob SDL Version
@@ -28,16 +28,16 @@ get the game working
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
-static int texture_width = 0;
-static int texture_height = 0;
+
 
 Entity bee;
+Entity background;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
-    SDL_Surface *surface = NULL;
-    char *bmp_path = NULL;
+
+
 
     SDL_SetAppMetadata("Oily Bob", "1.0", "com.jamibaraki.oilybob");
 
@@ -53,8 +53,18 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_SetRenderLogicalPresentation(renderer, 640, 480, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
 
+    createEntity(&bee,"bee.bmp");
+    bee.xPos = 0;
+    bee.yPos = 0;
+
+    return SDL_APP_CONTINUE;  /* carry on with the program! */
+}
+
+int createEntity( Entity *entity, const std::string& graphic_name ){
+    SDL_Surface *surface = NULL;
+    char *bmp_path = NULL;
     // load the graphics
-    SDL_asprintf(&bmp_path, "%sgraphics/bee.bmp", SDL_GetBasePath());  /* allocate a string of the full file path */
+    SDL_asprintf(&bmp_path, "%sgraphics/%s", SDL_GetBasePath(),graphic_name.c_str());  /* allocate a string of the full file path */
     surface = SDL_LoadBMP(bmp_path);
     if (!surface) {
         SDL_Log("Couldn't load png: %s", SDL_GetError());
@@ -63,8 +73,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     SDL_free(bmp_path);
 
-    texture_width = surface->w;
-    texture_height = surface->h;
+
+    entity->width = surface->w;
+    entity->height = surface->h;
 
     //do the transparency
     const SDL_PixelFormatDetails *fmt = SDL_GetPixelFormatDetails(surface->format);
@@ -74,26 +85,15 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         SDL_Log("SDL_SetSurfaceColorKey failed: %s", SDL_GetError());
     }
 
-
-
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) {
+    bee.texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (!bee.texture) {
         SDL_Log("Couldn't create static texture: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-
-    bee.xPos = 100;
-    bee.yPos = 150;
-    bee.texture = texture;
-
     SDL_DestroySurface(surface);
 
-
-
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
-
 
 
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
@@ -115,17 +115,13 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
 
-
-
-
-    //dst_rect.x = 100.0f;
     dst_rect.x = bee.xPos;
     dst_rect.y = bee.yPos;
-    dst_rect.w = (float) texture_width;
-    dst_rect.h = (float) texture_height;
+
+    dst_rect.w = (float) bee.width;
+    dst_rect.h = (float) bee.height;
+
     SDL_RenderTexture(renderer, bee.texture, NULL, &dst_rect);
-
-
 
 
     /* put the newly-cleared rendering on the screen. */
@@ -140,5 +136,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(bee.texture); //not sure if both are needed!
     /* SDL will clean up the window/renderer for us. */
 }
