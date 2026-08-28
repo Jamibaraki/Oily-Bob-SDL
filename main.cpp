@@ -54,6 +54,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 
     createEntity(&bee,"bee.bmp");
+    createEntity(&background,"background.bmp");
     bee.xPos = 0;
     bee.yPos = 0;
 
@@ -85,8 +86,8 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
         SDL_Log("SDL_SetSurfaceColorKey failed: %s", SDL_GetError());
     }
 
-    bee.texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!bee.texture) {
+    entity->texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (!entity->texture) {
         SDL_Log("Couldn't create static texture: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -115,13 +116,27 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
 
+
+    dst_rect.x = background.xPos;
+    dst_rect.y = background.yPos;
+
+    dst_rect.w = (float) background.width;
+    dst_rect.h = (float) background.height;
+
+    SDL_RenderTexture(renderer, background.texture, NULL, &dst_rect);
+
     dst_rect.x = bee.xPos;
     dst_rect.y = bee.yPos;
 
     dst_rect.w = (float) bee.width;
     dst_rect.h = (float) bee.height;
 
+
     SDL_RenderTexture(renderer, bee.texture, NULL, &dst_rect);
+
+
+
+
 
 
     /* put the newly-cleared rendering on the screen. */
@@ -137,5 +152,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     SDL_DestroyTexture(texture);
     SDL_DestroyTexture(bee.texture); //not sure if both are needed!
+    SDL_DestroyTexture(background.texture);
     /* SDL will clean up the window/renderer for us. */
 }
