@@ -6,6 +6,7 @@ using namespace std;
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+
 /**
 Oily Bob SDL Version
 Conversion of my Allegro platform game to SDL
@@ -61,6 +62,16 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     texture_width = surface->w;
     texture_height = surface->h;
+
+    //do the transparency
+    const SDL_PixelFormatDetails *fmt = SDL_GetPixelFormatDetails(surface->format);
+    const SDL_Palette *palette = SDL_GetSurfacePalette(surface);   // can be NULL
+    Uint32 key = SDL_MapRGB(fmt, palette, 255, 0, 255);
+    if (!SDL_SetSurfaceColorKey(surface, true, key)) {
+        SDL_Log("SDL_SetSurfaceColorKey failed: %s", SDL_GetError());
+    }
+
+
 
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (!texture) {
