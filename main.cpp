@@ -19,7 +19,8 @@ get a sound playing
 get joystick controlling bob
 get keyboard also controlling bob
 get the game working
-
+collisions
+fullscreen mode?
 
 **/
 
@@ -59,6 +60,10 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     createEntity(&background,"background.bmp");
     bee.xPos = 100;
     bee.yPos = 50;
+    bee.speed = 2;
+    bee.direction = 1;
+    bee.lBound = 50;
+    bee.rBound = 150;
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -99,6 +104,18 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
 }
 
 
+int updateGame(){
+    //animate the bee. Eventually generalize to all sprites
+    bee.xPos += (bee.speed * bee.direction);
+    if(bee.xPos>bee.rBound){
+        bee.direction = -1;
+    }
+    if (bee.xPos<bee.lBound){
+        bee.direction = 1;
+    }
+
+}
+
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
@@ -112,19 +129,20 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     SDL_FRect dst_rect;
-    const double now = ((double)SDL_GetTicks()) / 1000.0;  /* convert from milliseconds to seconds. */
+
+    const double now = ((double)SDL_GetTicks());
     SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE_FLOAT);  /* new color, full alpha. */
 
-    const int framerate = 30;
 
-    //animate the bee a little based on ticks. Somewhat chaotic!
-    if ( (static_cast<int>(now) % 2) < 1  ){
-        bee.xPos ++;
-    } else {
-        bee.xPos --;
+    const int ticks_per_frame = 33; // roughly 30 fps
+
+    //calculate the frames and lets put the actual game updates in a separate function for clarity
+    while ( now > last_step + ticks_per_frame ){
+        updateGame();
+        last_step += ticks_per_frame;
     }
 
-
+    // the rendering doesn't need to be repeated. That would be silly.
 
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);

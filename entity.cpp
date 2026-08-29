@@ -7,4 +7,8 @@ class Entity {
         SDL_Texture *texture;
         int width;
         int height;
+        int lBound;
+        int rBound;
+        int speed;
+        int direction;
 };
