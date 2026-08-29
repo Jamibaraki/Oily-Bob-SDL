@@ -1,5 +1,7 @@
 # Oily-Bob-SDL
 
-Work In Progress
+A bright, cheerful platform game using C++.  
 
-Converting an Allegro project to SDL
+Work In Progress.  
+
+Converting an Allegro project to SDL 3.  

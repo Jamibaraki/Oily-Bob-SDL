@@ -23,11 +23,13 @@ get the game working
 
 **/
 
-
+//SDLs more complex examples combine these into appstate structure.. may be worth doing
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
+
+Uint64 last_step; // for getting animations timed right.
 
 
 Entity bee;
@@ -55,8 +57,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     createEntity(&bee,"bee.bmp");
     createEntity(&background,"background.bmp");
-    bee.xPos = 0;
-    bee.yPos = 0;
+    bee.xPos = 100;
+    bee.yPos = 50;
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -112,6 +114,17 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_FRect dst_rect;
     const double now = ((double)SDL_GetTicks()) / 1000.0;  /* convert from milliseconds to seconds. */
     SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE_FLOAT);  /* new color, full alpha. */
+
+    const int framerate = 30;
+
+    //animate the bee a little based on ticks. Somewhat chaotic!
+    if ( (static_cast<int>(now) % 2) < 1  ){
+        bee.xPos ++;
+    } else {
+        bee.xPos --;
+    }
+
+
 
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
