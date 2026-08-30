@@ -35,6 +35,7 @@ Uint64 last_step; // for getting animations timed right.
 
 Entity bee;
 Entity background;
+Entity bob;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -58,12 +59,18 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     createEntity(&bee,"bee.bmp");
     createEntity(&background,"background.bmp");
+    createEntity(&bob,"bob.bmp");
     bee.xPos = 100;
     bee.yPos = 50;
     bee.speed = 2;
     bee.direction = 1;
     bee.lBound = 50;
     bee.rBound = 150;
+
+    bob.xPos=250;
+    bob.yPos = 350;
+    bob.direction = 0;
+    bob.speed = 1;
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -103,7 +110,7 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
 
 }
 
-
+//update the game state
 int updateGame(){
     //animate the bee. Eventually generalize to all sprites
     bee.xPos += (bee.speed * bee.direction);
@@ -114,7 +121,43 @@ int updateGame(){
         bee.direction = 1;
     }
 
+    bob.xPos += bob.speed * bob.direction;
+
 }
+
+//handle keyboard input
+static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
+{
+    switch (key_code) {
+#ifndef SDL_PLATFORM_EMSCRIPTEN
+    /* Quit. */
+    case SDLK_ESCAPE:
+    case SDLK_Q:
+        return SDL_APP_SUCCESS;
+#endif
+    /* Restart the game as if the program was launched. */
+    case SDLK_SPACE:
+        //jump
+        break;
+
+    case SDLK_RIGHT:
+        //move bob right
+        bob.direction = isDown;
+        break;
+
+    case SDLK_LEFT:
+        //move bob left
+        bob.direction = isDown*-1;
+        break;
+
+    default:
+        break;
+    }
+    return SDL_APP_CONTINUE;
+}
+
+
+
 
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
@@ -122,6 +165,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
     }
+
+    if(event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP ){
+        return handle_key_event_(event->key.key,event->key.down);
+    }
+
+
+
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
@@ -133,8 +183,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     const double now = ((double)SDL_GetTicks());
     SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE_FLOAT);  /* new color, full alpha. */
 
-
-    const int ticks_per_frame = 33; // roughly 30 fps
+    //think this looks glitchy, should use floats to smooth out the blips
+    const int ticks_per_frame = 16; // roughly 60 fps
 
     //calculate the frames and lets put the actual game updates in a separate function for clarity
     while ( now > last_step + ticks_per_frame ){
@@ -166,6 +216,15 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_RenderTexture(renderer, bee.texture, NULL, &dst_rect);
 
 
+    dst_rect.x = bob.xPos;
+    dst_rect.y = bob.yPos;
+    dst_rect.w = (float) bob.width;
+    dst_rect.h = (float) bob.height;
+
+
+    SDL_RenderTexture(renderer, bob.texture, NULL, &dst_rect);
+
+
 
 
 
@@ -184,5 +243,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
     SDL_DestroyTexture(texture);
     SDL_DestroyTexture(bee.texture); //not sure if both are needed!
     SDL_DestroyTexture(background.texture);
+    SDL_DestroyTexture(bob.texture);
     /* SDL will clean up the window/renderer for us. */
 }
