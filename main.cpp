@@ -14,14 +14,15 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 get some text displaying
-get a sprite displaying - DONE
 get a sound playing
-get joystick controlling bob
-get keyboard also controlling bob
+get jumping in
 get the game working
 collisions
 fullscreen mode?
 
+get a sprite displaying - DONE
+get keyboard also controlling bob - DONE
+get joystick controlling bob - DONE
 **/
 
 //SDLs more complex examples combine these into appstate structure.. may be worth doing
@@ -45,10 +46,24 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     SDL_SetAppMetadata("Oily Bob", "1.0", "com.jamibaraki.oilybob");
 
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+
+
+    //Joypad setup - opens a gamepad if connected. currently just the first one
+    int count = 0;
+    SDL_JoystickID *ids = SDL_GetGamepads(&count);
+    if (count > 0) {
+        SDL_Gamepad *gp = SDL_OpenGamepad(ids[0]);
+        if (gp) {
+            SDL_Log("Opened gamepad");
+        }
+    }
+    SDL_free(ids);
+
+
 
     if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
@@ -158,24 +173,43 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
 
 
 
+//handle joypad input
+static SDL_AppResult handle_joypad_event_(int button, int isDown){
+
+    //SDL_Log( SDL_GetGamepadStringForButton((SDL_GamepadButton)button) );
+    string input_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)button);
+    if( input_name == "dpright" ){
+        bob.direction = isDown;
+    } else if (input_name == "dpleft" ){
+
+        bob.direction = isDown*-1;
+    }
+
+    return SDL_APP_CONTINUE;
+}
+
 
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
+
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
     }
+
 
     if(event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP ){
         return handle_key_event_(event->key.key,event->key.down);
     }
 
-
+    if(event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN || event->type == SDL_EVENT_GAMEPAD_BUTTON_UP){
+        return handle_joypad_event_(event->gbutton.button,event->gbutton.down);
+    }
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
-/* This function runs once per frame, and is the heart of the program. */
+/* Runs every frame. Our heartbeat */
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     SDL_FRect dst_rect;
@@ -193,6 +227,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     }
 
     // the rendering doesn't need to be repeated. That would be silly.
+
+    //rendering does however need to be functionalized, as it is already quite silly
 
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
