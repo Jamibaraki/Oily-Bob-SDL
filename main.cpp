@@ -64,8 +64,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_free(ids);
 
 
-
-    if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    //fullscreen test
+    //if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_FULLSCREEN, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -245,7 +246,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     dst_rect.x = bee.xPos;
     dst_rect.y = bee.yPos;
 
-    dst_rect.w = (float) bee.width;
+    //slightly clumsy attempt at sprite flipping
+    dst_rect.w = (float) bee.width*bee.direction*-1;
     dst_rect.h = (float) bee.height;
 
 
