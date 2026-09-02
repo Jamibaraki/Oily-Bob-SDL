@@ -19,6 +19,7 @@ get jumping in
 get the game working
 collisions
 fullscreen mode?
+scrolling - DOING
 
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
@@ -37,6 +38,11 @@ Uint64 last_step; // for getting animations timed right.
 Entity bee;
 Entity background;
 Entity bob;
+Entity cheese;
+Entity alien;
+
+//horizontal scroll tracking
+int scrollOffsetX = 0;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -76,17 +82,19 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     createEntity(&bee,"bee.bmp");
     createEntity(&background,"background.bmp");
     createEntity(&bob,"bob.bmp");
+    createEntity(&cheese,"cheese.bmp");
+    createEntity(&alien,"enemy.bmp");
     bee.xPos = 100;
     bee.yPos = 50;
     bee.speed = 2;
     bee.direction = 1;
     bee.lBound = 50;
-    bee.rBound = 150;
+    bee.rBound = 220;
 
     bob.xPos=250;
     bob.yPos = 350;
     bob.direction = 0;
-    bob.speed = 1;
+    bob.speed = 3;
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -132,12 +140,30 @@ int updateGame(){
     bee.xPos += (bee.speed * bee.direction);
     if(bee.xPos>bee.rBound){
         bee.direction = -1;
+        bee.xPos-=bee.width/2;
     }
     if (bee.xPos<bee.lBound){
         bee.direction = 1;
+        bee.xPos+=bee.width/2;
+        SDL_Log("%d",bee.width);
     }
 
     bob.xPos += bob.speed * bob.direction;
+    int bobVector = bob.speed * bob.direction;
+    //check if we need to scroll
+    if(bob.xPos - scrollOffsetX > 480 && bobVector > 0)
+        scrollOffsetX -= bobVector;
+
+    if(bob.xPos - scrollOffsetX < 80 && bobVector < 0)
+        scrollOffsetX -= bobVector;
+
+    if (scrollOffsetX < 0)
+        scrollOffsetX = 0;
+    if(scrollOffsetX > 360)
+        scrollOffsetX = 360;
+
+
+
 
 }
 
@@ -235,7 +261,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_RenderClear(renderer);
 
 
-    dst_rect.x = background.xPos;
+    //dst_rect.x = background.xPos;
+    dst_rect.x = scrollOffsetX;
     dst_rect.y = background.yPos;
 
     dst_rect.w = (float) background.width;
@@ -254,7 +281,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_RenderTexture(renderer, bee.texture, NULL, &dst_rect);
 
 
-    dst_rect.x = bob.xPos;
+    dst_rect.x = bob.xPos-scrollOffsetX;
     dst_rect.y = bob.yPos;
     dst_rect.w = (float) bob.width;
     dst_rect.h = (float) bob.height;
