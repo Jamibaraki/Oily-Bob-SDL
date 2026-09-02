@@ -145,17 +145,16 @@ int updateGame(){
     if (bee.xPos<bee.lBound){
         bee.direction = 1;
         bee.xPos+=bee.width/2;
-        SDL_Log("%d",bee.width);
     }
 
     bob.xPos += bob.speed * bob.direction;
     int bobVector = bob.speed * bob.direction;
     //check if we need to scroll
     if(bob.xPos - scrollOffsetX > 480 && bobVector > 0)
-        scrollOffsetX -= bobVector;
+        scrollOffsetX += bobVector;
 
     if(bob.xPos - scrollOffsetX < 80 && bobVector < 0)
-        scrollOffsetX -= bobVector;
+        scrollOffsetX += bobVector; //which will be negative
 
     if (scrollOffsetX < 0)
         scrollOffsetX = 0;
@@ -262,7 +261,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
     //dst_rect.x = background.xPos;
-    dst_rect.x = scrollOffsetX;
+    dst_rect.x = -scrollOffsetX;
     dst_rect.y = background.yPos;
 
     dst_rect.w = (float) background.width;
@@ -270,7 +269,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     SDL_RenderTexture(renderer, background.texture, NULL, &dst_rect);
 
-    dst_rect.x = bee.xPos;
+    dst_rect.x = bee.xPos-scrollOffsetX;
     dst_rect.y = bee.yPos;
 
     //slightly clumsy attempt at sprite flipping
