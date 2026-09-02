@@ -5,6 +5,7 @@ using namespace std;
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+
 #include "entity.cpp"
 #include "main.h"
 
@@ -15,15 +16,20 @@ Conversion of my Allegro platform game to SDL
 Todo:
 get some text displaying
 get a sound playing
+platforms displaying
 get jumping in
 get the game working
 collisions
-fullscreen mode?
-scrolling - DOING
+scoring
+levels
+high score table
+
 
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
 get joystick controlling bob - DONE
+fullscreen mode - DONE
+scrolling - DONE
 **/
 
 //SDLs more complex examples combine these into appstate structure.. may be worth doing
@@ -290,7 +296,10 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
 
-
+    //do debug text
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderDebugText(renderer, 250, 15, "Score:");
+    SDL_RenderDebugText(renderer, 10, 15, "Lives:");
 
 
     /* put the newly-cleared rendering on the screen. */
