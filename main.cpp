@@ -14,8 +14,7 @@ Oily Bob SDL Version
 Conversion of my Allegro platform game to SDL
 
 Todo:
-get some text displaying
-get a sound playing
+get sound playing correctly
 platforms displaying
 get jumping in
 get the game working
@@ -30,9 +29,11 @@ get keyboard also controlling bob - DONE
 get joystick controlling bob - DONE
 fullscreen mode - DONE
 scrolling - DONE
+get some text displaying - DONE
+get a sound playing - DONE
 **/
 
-//SDLs more complex examples combine these into appstate structure.. may be worth doing
+//SDL's more complex examples combine these into appstate structure.. may be worth doing
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
@@ -40,7 +41,13 @@ static SDL_Texture *texture = NULL;
 
 Uint64 last_step; // for getting animations timed right.
 
+//audio
+static SDL_AudioStream *stream = NULL;
+static Uint8 *wav_data = NULL;
+static Uint32 wav_data_len = 0;
 
+
+//various game entity types
 Entity bee;
 Entity background;
 Entity bob;
@@ -53,12 +60,13 @@ int scrollOffsetX = 0;
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
-
+    SDL_AudioSpec spec;
+    char *wav_path = NULL;
 
 
     SDL_SetAppMetadata("Oily Bob", "1.0", "com.jamibaraki.oilybob");
 
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_AUDIO )) {
         SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -76,7 +84,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_free(ids);
 
 
-    //fullscreen test
+    //fullscreen or windowed
     //if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
     if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_FULLSCREEN, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
@@ -85,6 +93,30 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_SetRenderLogicalPresentation(renderer, 640, 480, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
 
+    /* Load the .wav  */
+    SDL_asprintf(&wav_path, "%ssound/jump.wav", SDL_GetBasePath());
+    if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
+        SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    SDL_free(wav_path);  /* done with this string. */
+
+    /* Create our audio stream in the same format as the .wav file. It'll convert to what the audio hardware wants. */
+    stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+    if (!stream) {
+        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    /* SDL_OpenAudioDeviceStream starts the device paused. You have to tell it to start! */
+    SDL_ResumeAudioStreamDevice(stream);
+
+
+
+
+
+    //create game entities and load the graphics
     createEntity(&bee,"bee.bmp");
     createEntity(&background,"background.bmp");
     createEntity(&bob,"bob.bmp");
@@ -185,6 +217,12 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
     /* Restart the game as if the program was launched. */
     case SDLK_SPACE:
         //jump
+
+        //audio test
+        if (SDL_GetAudioStreamQueued(stream) < (int)wav_data_len) {
+            // feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data.
+            SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
+        }
         break;
 
     case SDLK_RIGHT:
@@ -258,6 +296,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         last_step += ticks_per_frame;
     }
 
+
+
     // the rendering doesn't need to be repeated. That would be silly.
 
     //rendering does however need to be functionalized, as it is already quite silly
@@ -317,5 +357,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
     SDL_DestroyTexture(bee.texture); //not sure if both are needed!
     SDL_DestroyTexture(background.texture);
     SDL_DestroyTexture(bob.texture);
+    SDL_free(wav_data);
     /* SDL will clean up the window/renderer for us. */
 }
