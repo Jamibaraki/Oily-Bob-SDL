@@ -63,7 +63,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_AudioSpec spec;
     char *wav_path = NULL;
 
-
     SDL_SetAppMetadata("Oily Bob", "1.0", "com.jamibaraki.oilybob");
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_AUDIO )) {
@@ -219,9 +218,11 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
         //jump
 
         //audio test
-        if (SDL_GetAudioStreamQueued(stream) < (int)wav_data_len) {
+        //set this to zero so it just ads the sample if there's nothing already playing
+        if (SDL_GetAudioStreamQueued(stream) == 0) {
             // feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data.
             SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
+
         }
         break;
 
