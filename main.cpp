@@ -14,7 +14,6 @@ Oily Bob SDL Version
 Conversion of my Allegro platform game to SDL
 
 Todo:
-get sound playing correctly
 platforms displaying
 get jumping in
 get the game working
@@ -31,6 +30,7 @@ fullscreen mode - DONE
 scrolling - DONE
 get some text displaying - DONE
 get a sound playing - DONE
+get sound playing correctly - DONE
 **/
 
 //SDL's more complex examples combine these into appstate structure.. may be worth doing
@@ -53,9 +53,13 @@ Entity background;
 Entity bob;
 Entity cheese;
 Entity alien;
+Entity platform;
 
 //horizontal scroll tracking
 int scrollOffsetX = 0;
+
+Uint16 lives = 0;
+Uint16 score = 0;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -121,6 +125,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     createEntity(&bob,"bob.bmp");
     createEntity(&cheese,"cheese.bmp");
     createEntity(&alien,"enemy.bmp");
+    createEntity(&platform,"platform.bmp");
     bee.xPos = 100;
     bee.yPos = 50;
     bee.speed = 2;
@@ -306,35 +311,12 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
 
-
-    //dst_rect.x = background.xPos;
-    dst_rect.x = -scrollOffsetX;
-    dst_rect.y = background.yPos;
-
-    dst_rect.w = (float) background.width;
-    dst_rect.h = (float) background.height;
-
-    SDL_RenderTexture(renderer, background.texture, NULL, &dst_rect);
-
-    dst_rect.x = bee.xPos-scrollOffsetX;
-    dst_rect.y = bee.yPos;
-
-    //slightly clumsy attempt at sprite flipping
-    dst_rect.w = (float) bee.width*bee.direction*-1;
-    dst_rect.h = (float) bee.height;
+    drawSprite(&background,&dst_rect);
 
 
-    SDL_RenderTexture(renderer, bee.texture, NULL, &dst_rect);
+    drawSprite(&bee,&dst_rect,true);
 
-
-    dst_rect.x = bob.xPos-scrollOffsetX;
-    dst_rect.y = bob.yPos;
-    dst_rect.w = (float) bob.width;
-    dst_rect.h = (float) bob.height;
-
-
-    SDL_RenderTexture(renderer, bob.texture, NULL, &dst_rect);
-
+    drawSprite(&bob, &dst_rect);
 
 
     //do debug text
@@ -349,7 +331,18 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
+void drawSprite(Entity *entity, SDL_FRect *rect,bool flipped ){
+    rect->x = entity->xPos-scrollOffsetX;
+    rect->y = entity->yPos;
+    rect->w = (float) entity->width;
+    rect->h = (float) entity->height;
+    if (flipped ){
+        rect->w *= -entity->direction;
+    }
 
+    SDL_RenderTexture(renderer, entity->texture, NULL, rect);
+
+}
 
 /* This function runs once at shutdown. */
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
