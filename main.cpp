@@ -9,6 +9,8 @@ using namespace std;
 #include <SDL3/SDL_main.h>
 
 #include "entity.cpp"
+#include "level-data.cpp"
+#include "level-maker.h"
 #include "main.h"
 
 /**
@@ -22,6 +24,7 @@ collisions
 scoring
 levels
 high score table
+horizontal movement acceleration
 
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
@@ -58,6 +61,8 @@ Entity cheese;
 Entity alien;
 Entity platform;
 
+LevelData levels[10];
+
 //horizontal scroll tracking
 int scrollOffsetX = 0;
 
@@ -85,6 +90,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+    makeLevel();
 
     //Joypad setup - opens a gamepad if connected. currently just the first one
     int count = 0;
@@ -125,9 +131,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     /* SDL_OpenAudioDeviceStream starts the device paused. You have to tell it to start! */
     SDL_ResumeAudioStreamDevice(stream);
-
-
-
 
 
     //create game entities and load the graphics
