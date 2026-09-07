@@ -11,4 +11,5 @@ class Entity {
         int rBound;
         int speed;
         int direction;
+        int ySpeed;
 };

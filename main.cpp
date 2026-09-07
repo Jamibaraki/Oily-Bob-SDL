@@ -3,6 +3,8 @@
 using namespace std;
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
+#define Ground 329
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
@@ -15,13 +17,11 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 platforms displaying
-get jumping in
 get the game working
 collisions
 scoring
 levels
 high score table
-
 
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
@@ -31,7 +31,10 @@ scrolling - DONE
 get some text displaying - DONE
 get a sound playing - DONE
 get sound playing correctly - DONE
+get jumping in - DONE
 **/
+
+
 
 //SDL's more complex examples combine these into appstate structure.. may be worth doing
 /* We will use this renderer to draw into this window every frame. */
@@ -58,8 +61,16 @@ Entity platform;
 //horizontal scroll tracking
 int scrollOffsetX = 0;
 
+//control flags
+bool pressJump = false;
+
+bool jumpPeak = false;
+bool bobYCollision;
+
 Uint16 lives = 0;
 Uint16 score = 0;
+
+
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -178,6 +189,25 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
 
 //update the game state
 int updateGame(){
+
+    if (pressJump){
+        bobJump();
+    }
+
+    //do all the jump tracking. remember in other version -= yspeed to sprite. trying to flip!!
+    if(bob.ySpeed < -11)
+         jumpPeak = true;
+
+    if(bob.yPos < Ground && bobYCollision == false)
+                 bob.ySpeed ++;
+
+    if ( bob.yPos > Ground) {
+        bob.ySpeed = 0;
+        bob.yPos = Ground;
+        jumpPeak = false;
+    }
+
+
     //animate the bee. Eventually generalize to all sprites
     bee.xPos += (bee.speed * bee.direction);
     if(bee.xPos>bee.rBound){
@@ -190,6 +220,7 @@ int updateGame(){
     }
 
     bob.xPos += bob.speed * bob.direction;
+    bob.yPos += bob.ySpeed;
     int bobVector = bob.speed * bob.direction;
     //check if we need to scroll
     if(bob.xPos - scrollOffsetX > 480 && bobVector > 0)
@@ -202,6 +233,26 @@ int updateGame(){
         scrollOffsetX = 0;
     if(scrollOffsetX > 360)
         scrollOffsetX = 360;
+
+
+
+
+}
+
+void bobJump(){
+
+    if (!jumpPeak){
+
+
+        //set this to zero so it just ads the sample if there's nothing already playing
+        if (SDL_GetAudioStreamQueued(stream) == 0) {
+            // feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data.
+            SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
+
+        }
+
+        bob.ySpeed-=2;
+    }
 
 
 
@@ -221,14 +272,10 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
     /* Restart the game as if the program was launched. */
     case SDLK_SPACE:
         //jump
+        pressJump = isDown;
 
         //audio test
-        //set this to zero so it just ads the sample if there's nothing already playing
-        if (SDL_GetAudioStreamQueued(stream) == 0) {
-            // feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data.
-            SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
 
-        }
         break;
 
     case SDLK_RIGHT:
