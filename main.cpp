@@ -8,8 +8,8 @@ using namespace std;
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "entity.cpp"
-#include "level-data.cpp"
+#include "entity.h"
+#include "level-data.h"
 #include "level-maker.h"
 #include "main.h"
 
@@ -371,8 +371,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     //do debug text
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderDebugText(renderer, 250, 15, "Score:");
-    SDL_RenderDebugText(renderer, 10, 15, "Lives:");
+    SDL_RenderDebugTextFormat(renderer, 250, 15, "Score: %i",score);
+    SDL_RenderDebugTextFormat(renderer, 10, 15, "Lives: %i",lives);
 
 
     /* put the newly-cleared rendering on the screen. */

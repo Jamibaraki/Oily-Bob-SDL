@@ -1,4 +1,4 @@
-#include <SDL3/SDL.h>
+#pragma once
 
 class Entity {
     public:
