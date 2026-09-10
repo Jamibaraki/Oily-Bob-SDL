@@ -4,11 +4,13 @@ using namespace std;
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #define Ground 329
+#define PLATFORM_BLOCK_WIDTH 60
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
 #include "entity.h"
+#include "platform.h"
 #include "level-data.h"
 #include "level-maker.h"
 #include "main.h"
@@ -25,6 +27,7 @@ scoring
 levels
 high score table
 horizontal movement acceleration
+prevent chain jumping trick?
 
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
@@ -61,7 +64,10 @@ Entity cheese;
 Entity alien;
 Entity platform;
 
+//don't necessarily need this.. could just pull them dynamically from level maker
 LevelData levels[10];
+LevelData currentLevel;
+
 
 //horizontal scroll tracking
 int scrollOffsetX = 0;
@@ -90,7 +96,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    makeLevel();
+    currentLevel = makeLevel(0);
 
     //Joypad setup - opens a gamepad if connected. currently just the first one
     int count = 0;

@@ -1,2 +1,4 @@
+#pragma once
+#include "level-data.h"
 
-int makeLevel();
+LevelData makeLevel(int level);
