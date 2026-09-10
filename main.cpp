@@ -20,7 +20,7 @@ Oily Bob SDL Version
 Conversion of my Allegro platform game to SDL
 
 Todo:
-platforms displaying
+
 get the game working
 collisions
 scoring
@@ -29,6 +29,7 @@ high score table
 horizontal movement acceleration
 prevent chain jumping trick?
 
+platforms displaying - DONE
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
 get joystick controlling bob - DONE
@@ -372,7 +373,23 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     drawSprite(&bee,&dst_rect,true);
 
+
+    //draw platforms
+    for( Platform p : currentLevel.platforms){
+        for( int i=0;i<p.width;i++){
+            platform.xPos = p.xPos + (i*PLATFORM_BLOCK_WIDTH);
+            platform.yPos = p.yPos;
+            drawSprite(&platform,&dst_rect);
+        }
+    }
+
+
+
+
     drawSprite(&bob, &dst_rect);
+
+
+
 
 
     //do debug text
