@@ -5,3 +5,4 @@ LevelData makeLevel(int level);
 
 
 Platform createPlatform( int xPos, int yPos, int width);
+Cheese createCheese( int xPos, int yPos );

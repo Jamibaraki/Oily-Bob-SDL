@@ -11,9 +11,20 @@ LevelData makeLevel(int level){
     newLevel.platforms.push_back( createPlatform( 250,400,5 ) );
     newLevel.platforms.push_back( createPlatform( 450,300,3 ) );
 
+    newLevel.cheeses.push_back( createCheese(75,240));
+    newLevel.cheeses.push_back( createCheese(300,340));
+    newLevel.cheeses.push_back( createCheese(470,240));
+
     return newLevel;
 }
 
+Cheese createCheese( int xPos, int yPos ){
+    Cheese c = Cheese();
+    c.xPos = xPos;
+    c.yPos = yPos;
+    c.status = 1;
+    return c;
+}
 
 Platform createPlatform( int xPos, int yPos, int width){
     Platform p = Platform();

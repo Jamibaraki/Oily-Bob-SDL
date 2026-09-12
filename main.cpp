@@ -22,9 +22,11 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
+joypad buttons should make Bob jump
 aliens in
 get the game working
-collisions
+enemy collisions
+cheese collectable
 scoring
 level progression
 high score table
@@ -42,6 +44,7 @@ get a sound playing - DONE
 get sound playing correctly - DONE
 get jumping in - DONE
 platforms working - DONE
+cheese - DONE
 **/
 
 
@@ -392,6 +395,15 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     drawSprite(&bee,&dst_rect,true);
 
+    //draw cheeses
+    for( Cheese c : currentLevel.cheeses ){
+        if ( c.status ) {
+            cheese.xPos = c.xPos;
+            cheese.yPos = c.yPos;
+            drawSprite(&cheese,&dst_rect);
+        }
+
+    }
 
     //draw platforms
     for( Platform p : currentLevel.platforms){
