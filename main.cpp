@@ -26,9 +26,6 @@ joypad buttons should make Bob jump
 aliens in
 get the game working
 enemy collisions
-
-scoring
-make it possible to score over 65000 points!!! variable is obv. too small.
 level progression
 high score table
 horizontal movement acceleration
@@ -47,6 +44,8 @@ get jumping in - DONE
 platforms working - DONE
 cheese - DONE
 cheese collectable - DONE
+scoring - DONE
+make it possible to score over 65000 points!!! variable is obv. too small. - DONE
 **/
 
 
@@ -88,7 +87,7 @@ bool jumpPeak = false;
 bool bobYCollision;
 
 Uint16 lives = 0;
-Uint16 score = 0;
+Uint32 score = 0;
 
 
 
