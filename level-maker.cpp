@@ -22,7 +22,7 @@ Cheese createCheese( int xPos, int yPos ){
     Cheese c = Cheese();
     c.xPos = xPos;
     c.yPos = yPos;
-    c.status = 1;
+    c.status = true;
     return c;
 }
 

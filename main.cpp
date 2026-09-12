@@ -26,7 +26,7 @@ joypad buttons should make Bob jump
 aliens in
 get the game working
 enemy collisions
-cheese collectable
+
 scoring
 make it possible to score over 65000 points!!! variable is obv. too small.
 level progression
@@ -46,6 +46,7 @@ get sound playing correctly - DONE
 get jumping in - DONE
 platforms working - DONE
 cheese - DONE
+cheese collectable - DONE
 **/
 
 
@@ -262,12 +263,12 @@ int updateGame(){
 
 
     //cheese collision detection
-    for( Cheese c : currentLevel.cheeses ) {
+    for( Cheese& c : currentLevel.cheeses ) {
         //check if we hit a cheese
-        if( c.status ==1 ) {
+        if( c.status == true ) {
             if(c.xPos - bob.xPos > -70 && c.xPos - bob.xPos < 50) {
                 if(c.yPos - bob.yPos < 130 && c.yPos - bob.yPos > -63) {
-                    c.status = 0;
+                    c.status = false;
                     score += 100;
 
                 }
@@ -413,7 +414,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     //draw cheeses
     for( Cheese c : currentLevel.cheeses ){
-        if ( c.status ) {
+        if ( c.status == true ) {
             cheese.xPos = c.xPos;
             cheese.yPos = c.yPos;
             drawSprite(&cheese,&dst_rect);
