@@ -5,6 +5,7 @@ using namespace std;
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #define Ground 329
 #define PLATFORM_BLOCK_WIDTH 60
+#define BOB_SPRITE_HEIGHT 125  //just the visible part, crops the gap under him
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -21,10 +22,11 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
+aliens in
 get the game working
 collisions
 scoring
-levels
+level progression
 high score table
 horizontal movement acceleration
 prevent chain jumping trick?
@@ -39,6 +41,7 @@ get some text displaying - DONE
 get a sound playing - DONE
 get sound playing correctly - DONE
 get jumping in - DONE
+platforms working - DONE
 **/
 
 
@@ -112,8 +115,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 
     //fullscreen or windowed
-    //if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-    if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_FULLSCREEN, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    //if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_FULLSCREEN, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -202,7 +205,7 @@ int updateGame(){
 
     if (pressJump){
         bobJump();
-    }
+    } else if (bob.yPos < Ground){jumpPeak = true;}
 
     //do all the jump tracking. remember in other version -= yspeed to sprite. trying to flip!!
     if(bob.ySpeed < -11)
@@ -232,6 +235,32 @@ int updateGame(){
     bob.xPos += bob.speed * bob.direction;
     bob.yPos += bob.ySpeed;
     int bobVector = bob.speed * bob.direction;
+
+
+
+    //platform collision detection
+    bobYCollision = false;
+    if (jumpPeak == true) {
+        for( Platform p : currentLevel.platforms){
+            if((bob.xPos - p.xPos > -35) && ((bob.xPos+50) - (p.xPos + (PLATFORM_BLOCK_WIDTH*p.width)) < 35)) {
+                //presumably 130 is bobs height..
+                if((bob.yPos+BOB_SPRITE_HEIGHT - p.yPos ) > (-bob.ySpeed +2) && (bob.yPos+BOB_SPRITE_HEIGHT-bob.ySpeed-1) - p.yPos < 0) {
+                    //detected a Y collision
+                     bob.yPos = p.yPos-BOB_SPRITE_HEIGHT;
+                     bobYCollision = true;
+                     bob.ySpeed = 5;
+                     jumpPeak = false;
+                }
+
+            }
+        }
+    }
+
+
+
+
+
+
     //check if we need to scroll
     if(bob.xPos - scrollOffsetX > 480 && bobVector > 0)
         scrollOffsetX += bobVector;
