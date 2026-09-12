@@ -20,6 +20,7 @@ Requires **SDL 3**.
 **Example (MinGW / g++):**
 ```bash
 g++ *.cpp -o oily-bob -lSDL3
+```
 
 ### Screenshot  
 
