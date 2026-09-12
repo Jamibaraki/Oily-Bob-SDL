@@ -253,19 +253,13 @@ void bobJump(){
 
     if (!jumpPeak){
 
-
-        //set this to zero so it just ads the sample if there's nothing already playing
+        //set this to zero so it just adds the sample if there's nothing already playing
         if (SDL_GetAudioStreamQueued(stream) == 0) {
-            // feed more data to the stream. It will queue at the end, and trickle out as the hardware needs more data.
             SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
-
         }
 
         bob.ySpeed-=2;
     }
-
-
-
 
 }
 
@@ -283,9 +277,6 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
     case SDLK_SPACE:
         //jump
         pressJump = isDown;
-
-        //audio test
-
         break;
 
     case SDLK_RIGHT:
@@ -309,7 +300,6 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
 //handle joypad input
 static SDL_AppResult handle_joypad_event_(int button, int isDown){
 
-    //SDL_Log( SDL_GetGamepadStringForButton((SDL_GamepadButton)button) );
     string input_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)button);
     if( input_name == "dpright" ){
         bob.direction = isDown;
