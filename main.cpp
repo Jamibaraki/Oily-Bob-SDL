@@ -28,6 +28,7 @@ get the game working
 enemy collisions
 cheese collectable
 scoring
+make it possible to score over 65000 points!!! variable is obv. too small.
 level progression
 high score table
 horizontal movement acceleration
@@ -255,6 +256,21 @@ int updateGame(){
                      jumpPeak = false;
                 }
 
+            }
+        }
+    }
+
+
+    //cheese collision detection
+    for( Cheese c : currentLevel.cheeses ) {
+        //check if we hit a cheese
+        if( c.status ==1 ) {
+            if(c.xPos - bob.xPos > -70 && c.xPos - bob.xPos < 50) {
+                if(c.yPos - bob.yPos < 130 && c.yPos - bob.yPos > -63) {
+                    c.status = 0;
+                    score += 100;
+
+                }
             }
         }
     }
