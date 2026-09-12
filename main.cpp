@@ -366,7 +366,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     //draw platforms
     for( Platform p : currentLevel.platforms){
-        for( int i=0;i<p.width;i++){
+        for( int i=0;i< p.width;i++){
             platform.xPos = p.xPos + (i*PLATFORM_BLOCK_WIDTH);
             platform.yPos = p.yPos;
             drawSprite(&platform,&dst_rect);
