@@ -23,7 +23,8 @@ Conversion of my Allegro platform game to SDL
 Todo:
 
 joypad buttons should make Bob jump
-aliens in
+
+bees into level data system
 get the game working
 enemy collisions
 level progression
@@ -46,6 +47,7 @@ cheese - DONE
 cheese collectable - DONE
 scoring - DONE
 make it possible to score over 65000 points!!! variable is obv. too small. - DONE
+aliens in - DONE
 **/
 
 
@@ -88,6 +90,8 @@ bool bobYCollision;
 
 Uint16 lives = 0;
 Uint32 score = 0;
+
+int enemySpeed = 2;
 
 
 
@@ -239,6 +243,24 @@ int updateGame(){
     bob.xPos += bob.speed * bob.direction;
     bob.yPos += bob.ySpeed;
     int bobVector = bob.speed * bob.direction;
+
+    //move enemies (then remove above..
+    for( Enemy& e : currentLevel.enemies ){
+        e.xPos += enemySpeed * e.direction;
+        switch(e.type){
+            case 1:
+            if( ( e.xPos+enemySpeed ) < ( currentLevel.platforms[e.platform].xPos  ) ){
+               e.direction = 1;
+            }
+
+            if( e.xPos+enemySpeed+alien.width > ( currentLevel.platforms[e.platform].xPos+ currentLevel.platforms[e.platform].width * PLATFORM_BLOCK_WIDTH)){
+                e.direction = -1;
+            }
+
+        }
+    //type 2 is the alien, 2 is the bee..
+
+    }
 
 
 
@@ -410,6 +432,12 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
     drawSprite(&bee,&dst_rect,true);
+    //draw enemies
+    for( Enemy e : currentLevel.enemies ){
+        alien.xPos = e.xPos;
+        alien.yPos = e.yPos;
+        drawSprite(&alien,&dst_rect);
+    }
 
     //draw cheeses
     for( Cheese c : currentLevel.cheeses ){

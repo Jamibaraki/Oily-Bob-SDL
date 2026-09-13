@@ -3,13 +3,15 @@
 #include "entity.h"
 #include "platform.h"
 #include "cheese.h"
+#include "enemy.h"
 
 class LevelData {
 
     public:
-        //int cheeses;
-        std::vector<Entity> entities;
+
+        std::vector<Enemy> enemies;
         std::vector<Platform> platforms;
         std::vector<Cheese> cheeses;
+
 };
 

@@ -7,6 +7,7 @@ LevelData makeLevel(int level){
 
     LevelData newLevel = LevelData();
 
+
     newLevel.platforms.push_back( createPlatform( 50,300,3 ) );
     newLevel.platforms.push_back( createPlatform( 250,400,5 ) );
     newLevel.platforms.push_back( createPlatform( 450,300,3 ) );
@@ -15,7 +16,19 @@ LevelData makeLevel(int level){
     newLevel.cheeses.push_back( createCheese(300,340));
     newLevel.cheeses.push_back( createCheese(470,240));
 
+    newLevel.enemies.push_back( createEnemy( 470,230,1,2) );
+
     return newLevel;
+}
+
+Enemy createEnemy( int xPos, int yPos, int type, int platform, int direction ){
+    Enemy e = Enemy();
+    e.xPos = xPos;
+    e.yPos = yPos;
+    e.platform = platform;
+    e.type = type;
+    e.direction = direction;
+    return e;
 }
 
 Cheese createCheese( int xPos, int yPos ){
