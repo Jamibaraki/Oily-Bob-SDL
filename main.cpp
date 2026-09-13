@@ -6,6 +6,7 @@ using namespace std;
 #define Ground 329
 #define PLATFORM_BLOCK_WIDTH 60
 #define BOB_SPRITE_HEIGHT 125  //just the visible part, crops the gap under him
+#define START_LIVES 3
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -22,11 +23,13 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
+Attract Mode
+Starting Game
+Ending Game
+Die Sound / Audio management
 joypad buttons should make Bob jump
-
 bees into level data system
 get the game working
-enemy collisions
 level progression
 high score table
 horizontal movement acceleration
@@ -48,6 +51,7 @@ cheese collectable - DONE
 scoring - DONE
 make it possible to score over 65000 points!!! variable is obv. too small. - DONE
 aliens in - DONE
+enemy collisions - DONE
 **/
 
 
@@ -88,7 +92,7 @@ bool pressJump = false;
 bool jumpPeak = false;
 bool bobYCollision;
 
-Uint16 lives = 0;
+Uint16 lives = START_LIVES;
 Uint32 score = 0;
 
 int enemySpeed = 2;
@@ -297,9 +301,24 @@ int updateGame(){
         }
     }
 
+    SDL_Rect a;
+    SDL_Rect b;
+    a.h = bob.height;
+    a.w = bob.width;
+    a.x = bob.xPos;
+    a.y = bob.yPos;
+    //enemy collision detection
+    for( Enemy& e: currentLevel.enemies ){
+        b.x = e.xPos;
+        b.y = e.yPos;
+        b.h = alien.height;
+        b.w = alien.width;
+        if( checkCollision(a,b) ){
+            bobDie();
+            continue;
+        }
 
-
-
+    }
 
 
     //check if we need to scroll
@@ -318,6 +337,16 @@ int updateGame(){
 
 
 }
+
+void bobDie(){
+    //die sound
+    lives --;
+    bob.xPos = 50;
+    jumpPeak=false;
+    scrollOffsetX=0;
+    bob.yPos = Ground;
+}
+
 
 void bobJump(){
 
@@ -501,4 +530,29 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
     SDL_DestroyTexture(bob.texture);
     SDL_free(wav_data);
     /* SDL will clean up the window/renderer for us. */
+}
+
+bool checkCollision( SDL_Rect a, SDL_Rect b )
+{
+    if( a.x >= b.x + b.w )
+    {
+        return false;
+    }
+
+    if( a.x + a.w <= b.x )
+    {
+        return false;
+    }
+
+    if( a.y >= b.y+b.h )
+    {
+        return false;
+    }
+
+    if( a.y + a.h <= b.y )
+    {
+        return false;
+    }
+
+    return true;
 }

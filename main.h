@@ -9,3 +9,7 @@ void drawSprite(Entity *entity, SDL_FRect *dst_rect,bool flipped = false);
 
 
 void bobJump();
+
+void bobDie();
+
+bool checkCollision( SDL_Rect a, SDL_Rect b );
