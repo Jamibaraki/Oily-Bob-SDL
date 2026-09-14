@@ -2,7 +2,7 @@
 #include "level-maker.h"
 
 LevelData makeLevel(int level){
-    //return 1;
+
     //switch case here after testing level 1
 
     LevelData newLevel = LevelData();
@@ -17,6 +17,9 @@ LevelData makeLevel(int level){
     newLevel.cheeses.push_back( createCheese(470,240));
 
     newLevel.enemies.push_back( createEnemy( 470,230,1,2) );
+
+    //seems in the other version, platform is just used to store a horizontal range for the bee..
+    newLevel.enemies.push_back( createEnemy( 150,200,2,50));
 
     return newLevel;
 }

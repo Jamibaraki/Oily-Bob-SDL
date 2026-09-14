@@ -1,11 +1,10 @@
 #include <iostream>
-
+#include <math.h>
 using namespace std;
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
-#define Ground 329
+#define Ground 345
 #define PLATFORM_BLOCK_WIDTH 60
-#define BOB_SPRITE_HEIGHT 125  //just the visible part, crops the gap under him
 #define START_LIVES 3
 
 #include <SDL3/SDL.h>
@@ -28,12 +27,13 @@ Starting Game
 Ending Game
 Die Sound / Audio management
 joypad buttons should make Bob jump
-bees into level data system
 get the game working
 level progression
 high score table
 horizontal movement acceleration
 prevent chain jumping trick?
+
+framecounter based anims will glitch when framecounter rolls over
 
 platforms displaying - DONE
 get a sprite displaying - DONE
@@ -52,6 +52,7 @@ scoring - DONE
 make it possible to score over 65000 points!!! variable is obv. too small. - DONE
 aliens in - DONE
 enemy collisions - DONE
+bees into level data system - DONE
 **/
 
 
@@ -94,6 +95,7 @@ bool bobYCollision;
 
 Uint16 lives = START_LIVES;
 Uint32 score = 0;
+Uint32 framecounter = 0;
 
 int enemySpeed = 2;
 
@@ -214,6 +216,7 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
 
 //update the game state
 int updateGame(){
+    framecounter++;
 
     if (pressJump){
         bobJump();
@@ -234,6 +237,7 @@ int updateGame(){
 
 
     //animate the bee. Eventually generalize to all sprites
+    /*
     bee.xPos += (bee.speed * bee.direction);
     if(bee.xPos>bee.rBound){
         bee.direction = -1;
@@ -243,6 +247,7 @@ int updateGame(){
         bee.direction = 1;
         bee.xPos+=bee.width/2;
     }
+    */
 
     bob.xPos += bob.speed * bob.direction;
     bob.yPos += bob.ySpeed;
@@ -260,6 +265,11 @@ int updateGame(){
             if( e.xPos+enemySpeed+alien.width > ( currentLevel.platforms[e.platform].xPos+ currentLevel.platforms[e.platform].width * PLATFORM_BLOCK_WIDTH)){
                 e.direction = -1;
             }
+            break;
+            case 2:
+                if(fmod( framecounter, -1*e.platform ) ==0)
+                    e.direction *= -1;
+            break;
 
         }
     //type 2 is the alien, 2 is the bee..
@@ -274,9 +284,9 @@ int updateGame(){
         for( Platform p : currentLevel.platforms){
             if((bob.xPos - p.xPos > -35) && ((bob.xPos+50) - (p.xPos + (PLATFORM_BLOCK_WIDTH*p.width)) < 35)) {
                 //presumably 130 is bobs height..
-                if((bob.yPos+BOB_SPRITE_HEIGHT - p.yPos ) > (-bob.ySpeed +2) && (bob.yPos+BOB_SPRITE_HEIGHT-bob.ySpeed-1) - p.yPos < 0) {
+                if((bob.yPos+bob.height - p.yPos ) > (-bob.ySpeed +2) && (bob.yPos+bob.height-bob.ySpeed-1) - p.yPos < 0) {
                     //detected a Y collision
-                     bob.yPos = p.yPos-BOB_SPRITE_HEIGHT;
+                     bob.yPos = p.yPos-bob.height;
                      bobYCollision = true;
                      bob.ySpeed = 5;
                      jumpPeak = false;
@@ -292,7 +302,7 @@ int updateGame(){
         //check if we hit a cheese
         if( c.status == true ) {
             if(c.xPos - bob.xPos > -70 && c.xPos - bob.xPos < 50) {
-                if(c.yPos - bob.yPos < 130 && c.yPos - bob.yPos > -63) {
+                if(c.yPos - bob.yPos < bob.height && c.yPos - bob.yPos > -63) {
                     c.status = false;
                     score += 100;
 
@@ -460,14 +470,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     drawSprite(&background,&dst_rect);
 
 
-    drawSprite(&bee,&dst_rect,true);
-    //draw enemies
-    for( Enemy e : currentLevel.enemies ){
-        alien.xPos = e.xPos;
-        alien.yPos = e.yPos;
-        drawSprite(&alien,&dst_rect);
-    }
-
     //draw cheeses
     for( Cheese c : currentLevel.cheeses ){
         if ( c.status == true ) {
@@ -489,11 +491,27 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
 
+    //draw enemies
+    for( Enemy e : currentLevel.enemies ){
+
+        switch( e.type ){
+        case 1:
+            alien.xPos = e.xPos;
+            alien.yPos = e.yPos;
+            drawSprite(&alien,&dst_rect);
+            break;
+        case 2:
+            bee.xPos = e.xPos;
+            bee.yPos = e.yPos;
+            drawSprite(&bee,&dst_rect, e.direction);
+            break;
+
+        }
+
+    }
+
 
     drawSprite(&bob, &dst_rect);
-
-
-
 
 
     //do debug text
@@ -508,13 +526,14 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
-void drawSprite(Entity *entity, SDL_FRect *rect,bool flipped ){
+void drawSprite(Entity *entity, SDL_FRect *rect,int flipped ){
     rect->x = entity->xPos-scrollOffsetX;
     rect->y = entity->yPos;
     rect->w = (float) entity->width;
     rect->h = (float) entity->height;
-    if (flipped ){
-        rect->w *= -entity->direction;
+
+    if (flipped == 1 ){
+        rect->w *= -1;
     }
 
     SDL_RenderTexture(renderer, entity->texture, NULL, rect);
