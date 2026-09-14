@@ -26,7 +26,7 @@ Attract Mode
 Starting Game
 Ending Game
 Die Sound / Audio management
-joypad buttons should make Bob jump
+
 get the game working
 level progression
 high score table
@@ -34,6 +34,7 @@ horizontal movement acceleration
 prevent chain jumping trick?
 
 framecounter based anims will glitch when framecounter rolls over
+clean up sprites
 
 platforms displaying - DONE
 get a sprite displaying - DONE
@@ -53,6 +54,7 @@ make it possible to score over 65000 points!!! variable is obv. too small. - DON
 aliens in - DONE
 enemy collisions - DONE
 bees into level data system - DONE
+joypad buttons should make Bob jump - DONE
 **/
 
 
@@ -410,11 +412,16 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
 static SDL_AppResult handle_joypad_event_(int button, int isDown){
 
     string input_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)button);
+    //SDL_Log( "input %s" ,input_name.c_str() );
     if( input_name == "dpright" ){
         bob.direction = isDown;
     } else if (input_name == "dpleft" ){
 
         bob.direction = isDown*-1;
+    }
+
+    if(strpbrk("abxy", input_name.c_str() ) ){
+        pressJump = isDown;
     }
 
     return SDL_APP_CONTINUE;
