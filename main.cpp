@@ -7,6 +7,9 @@ using namespace std;
 #define PLATFORM_BLOCK_WIDTH 60
 #define START_LIVES 3
 
+#define GAME_STATUS_ATTRACT_MODE 0
+#define GAME_STATUS_PLAYING 1
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
@@ -22,8 +25,6 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-Attract Mode
-Starting Game
 Ending Game
 Die Sound / Audio management
 get the game working
@@ -56,6 +57,8 @@ enemy collisions - DONE
 bees into level data system - DONE
 joypad buttons should make Bob jump - DONE
 level progression - DONE
+Attract Mode - DONE
+Starting Game - DONE
 **/
 
 
@@ -100,6 +103,7 @@ Uint16 lives = START_LIVES;
 Uint32 score = 0;
 Uint32 framecounter = 0;
 Uint16 level_counter = 0;
+Uint8 game_status = GAME_STATUS_ATTRACT_MODE;
 
 int enemySpeed = 2;
 
@@ -454,7 +458,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 /* Runs every frame. Our heartbeat */
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
-    if( currentLevel.cheeseCount == 0 ){
+    //some status checks
+    if( game_status == GAME_STATUS_ATTRACT_MODE && pressJump ){
+        currentLevel = makeLevel(1);
+        score = 0;
+        lives = START_LIVES;
+    }
+    //next level if we have run out of cheese
+    if( game_status == GAME_STATUS_PLAYING && currentLevel.cheeseCount == 0 ){
         level_counter++;
         currentLevel = makeLevel(level_counter);
     }
