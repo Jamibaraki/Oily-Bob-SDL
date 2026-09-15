@@ -8,7 +8,7 @@
 class LevelData {
 
     public:
-
+        int cheeseCount;
         std::vector<Enemy> enemies;
         std::vector<Platform> platforms;
         std::vector<Cheese> cheeses;

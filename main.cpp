@@ -26,12 +26,12 @@ Attract Mode
 Starting Game
 Ending Game
 Die Sound / Audio management
-
 get the game working
-level progression
+
 high score table
 horizontal movement acceleration
 prevent chain jumping trick?
+collisions need improvement
 
 framecounter based anims will glitch when framecounter rolls over
 clean up sprites
@@ -55,6 +55,7 @@ aliens in - DONE
 enemy collisions - DONE
 bees into level data system - DONE
 joypad buttons should make Bob jump - DONE
+level progression - DONE
 **/
 
 
@@ -98,6 +99,7 @@ bool bobYCollision;
 Uint16 lives = START_LIVES;
 Uint32 score = 0;
 Uint32 framecounter = 0;
+Uint16 level_counter = 0;
 
 int enemySpeed = 2;
 
@@ -307,6 +309,7 @@ int updateGame(){
                 if(c.yPos - bob.yPos < bob.height && c.yPos - bob.yPos > -63) {
                     c.status = false;
                     score += 100;
+                    currentLevel.cheeseCount --;
 
                 }
             }
@@ -451,6 +454,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 /* Runs every frame. Our heartbeat */
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
+    if( currentLevel.cheeseCount == 0 ){
+        level_counter++;
+        currentLevel = makeLevel(level_counter);
+    }
+
+
     SDL_FRect dst_rect;
 
     const double now = ((double)SDL_GetTicks());
