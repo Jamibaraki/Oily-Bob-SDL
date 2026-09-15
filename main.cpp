@@ -25,10 +25,9 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-Ending Game
+
 Die Sound / Audio management
 get the game working
-
 high score table
 horizontal movement acceleration
 prevent chain jumping trick?
@@ -59,6 +58,7 @@ joypad buttons should make Bob jump - DONE
 level progression - DONE
 Attract Mode - DONE
 Starting Game - DONE
+Ending Game - DONE
 **/
 
 
@@ -463,11 +463,18 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         currentLevel = makeLevel(1);
         score = 0;
         lives = START_LIVES;
+        game_status = GAME_STATUS_PLAYING;
     }
     //next level if we have run out of cheese
     if( game_status == GAME_STATUS_PLAYING && currentLevel.cheeseCount == 0 ){
         level_counter++;
         currentLevel = makeLevel(level_counter);
+    }
+
+    if( game_status == GAME_STATUS_PLAYING && lives == 0 ){
+        game_status = GAME_STATUS_ATTRACT_MODE;
+        currentLevel = makeLevel(0);
+        pressJump = false;
     }
 
 
