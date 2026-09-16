@@ -18,6 +18,7 @@ using namespace std;
 #include "level-data.h"
 #include "level-maker.h"
 #include "main.h"
+#include "hiscores.h"
 
 /**
 Oily Bob SDL Version
@@ -25,14 +26,12 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-
+Get original levels in
+Get game looping or ending at end
 Die Sound / Audio management
-get the game working
-high score table
 horizontal movement acceleration
 prevent chain jumping trick?
 collisions need improvement
-
 framecounter based anims will glitch when framecounter rolls over
 clean up sprites
 
@@ -59,6 +58,8 @@ level progression - DONE
 Attract Mode - DONE
 Starting Game - DONE
 Ending Game - DONE
+get the game working - DONE
+high score table - DONE
 **/
 
 
@@ -105,6 +106,8 @@ Uint32 framecounter = 0;
 Uint16 level_counter = 0;
 Uint8 game_status = GAME_STATUS_ATTRACT_MODE;
 
+Hiscores hiscores;
+
 int enemySpeed = 2;
 
 
@@ -123,6 +126,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
     currentLevel = makeLevel(0);
+
 
     //Joypad setup - opens a gamepad if connected. currently just the first one
     int count = 0;
@@ -472,9 +476,11 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     }
 
     if( game_status == GAME_STATUS_PLAYING && lives == 0 ){
+        //we're dead! game over
         game_status = GAME_STATUS_ATTRACT_MODE;
         currentLevel = makeLevel(0);
         pressJump = false;
+        hiscores.setScore(score);
     }
 
 
@@ -552,6 +558,14 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderDebugTextFormat(renderer, 250, 15, "Score: %i",score);
     SDL_RenderDebugTextFormat(renderer, 10, 15, "Lives: %i",lives);
+
+    if(game_status==GAME_STATUS_ATTRACT_MODE){
+        SDL_RenderDebugTextFormat(renderer, 200, 150, "Hiscores:");
+        for(int i=0;i<10;i++){
+            SDL_SetRenderDrawColor(renderer, 100+framecounter%100, (framecounter+100)%200, (i*20), SDL_ALPHA_OPAQUE);
+            SDL_RenderDebugTextFormat(renderer, 280, 170+(i*15), "%i",hiscores.hiscores[i]);
+        }
+    }
 
 
     /* put the newly-cleared rendering on the screen. */
