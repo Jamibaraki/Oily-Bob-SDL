@@ -2,6 +2,7 @@
 #include <math.h>
 using namespace std;
 
+#define START_LEVEL 1 //for testing
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #define Ground 345
 #define PLATFORM_BLOCK_WIDTH 60
@@ -469,10 +470,12 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 {
     //some status checks
     if( game_status == GAME_STATUS_ATTRACT_MODE && pressJump ){
-        currentLevel = makeLevel(1);
+        level_counter = START_LEVEL;
+        currentLevel = makeLevel(level_counter);
         score = 0;
         lives = START_LIVES;
         game_status = GAME_STATUS_PLAYING;
+
     }
     //next level if we have run out of cheese
     if( game_status == GAME_STATUS_PLAYING && currentLevel.cheeseCount == 0 ){

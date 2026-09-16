@@ -22,12 +22,19 @@ LevelData makeLevel(int level){
         newLevel.enemies.push_back( createEnemy( 150,200,2,50));
         break;
     case 2:
-        newLevel.platforms.push_back( createPlatform( 50,300,3 ) );
+        newLevel.platforms.push_back( createPlatform( 200,400,8 ) );
+        newLevel.platforms.push_back( createPlatform( 40,330,3 ) );
+        newLevel.platforms.push_back( createPlatform( 180,270,4 ) );
+        newLevel.platforms.push_back( createPlatform( 480,270,2 ) );
+        newLevel.platforms.push_back( createPlatform( 700,270,2 ) );
 
-        newLevel.cheeses.push_back( createCheese(75,240));
-        newLevel.cheeseCount = 1;
+        newLevel.cheeses.push_back( createCheese(205,335));
+        newLevel.cheeses.push_back( createCheese(485,210));
+        newLevel.cheeses.push_back( createCheese(710,210));
+        newLevel.cheeseCount = 3;
 
-        newLevel.enemies.push_back( createEnemy( 470,230,1,2) );
+        newLevel.enemies.push_back( createEnemy( 250,325,1,0) );
+        newLevel.enemies.push_back( createEnemy( 340,325,1,0,-1) );
 
 
         break;
