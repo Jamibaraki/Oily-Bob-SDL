@@ -7,7 +7,7 @@ using namespace std;
 #define Ground 345
 #define PLATFORM_BLOCK_WIDTH 60
 #define START_LIVES 3
-#define LEVEL_COUNT 2
+#define LEVEL_COUNT 4
 #define ENDING_FRAMES 350
 
 #define GAME_STATUS_ATTRACT_MODE 0
@@ -30,7 +30,9 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-Get original levels in
+Hiscore not recording when game completed
+suspicious cheese positioning on level 3
+enemy position needs turning for new sprite size
 Die Sound / Audio management
 horizontal movement acceleration
 prevent chain jumping trick?
@@ -64,6 +66,7 @@ Ending Game - DONE
 get the game working - DONE
 high score table - DONE
 Get game looping or ending at end - DONE
+Get original levels in - DONE
 **/
 
 
@@ -482,7 +485,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
         level_counter++;
-
+        bob.xPos = 50;
+        scrollOffsetX = 0;
         //end game if we are on final leve..
         if( level_counter > LEVEL_COUNT ){
             game_status = GAME_STATUS_ENDING;
