@@ -6,9 +6,12 @@ using namespace std;
 #define Ground 345
 #define PLATFORM_BLOCK_WIDTH 60
 #define START_LIVES 3
+#define LEVEL_COUNT 2
+#define ENDING_FRAMES 350
 
 #define GAME_STATUS_ATTRACT_MODE 0
 #define GAME_STATUS_PLAYING 1
+#define GAME_STATUS_ENDING 2
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -27,7 +30,6 @@ Conversion of my Allegro platform game to SDL
 Todo:
 
 Get original levels in
-Get game looping or ending at end
 Die Sound / Audio management
 horizontal movement acceleration
 prevent chain jumping trick?
@@ -60,6 +62,7 @@ Starting Game - DONE
 Ending Game - DONE
 get the game working - DONE
 high score table - DONE
+Get game looping or ending at end - DONE
 **/
 
 
@@ -105,6 +108,7 @@ Uint32 score = 0;
 Uint32 framecounter = 0;
 Uint16 level_counter = 0;
 Uint8 game_status = GAME_STATUS_ATTRACT_MODE;
+Uint16 ending_counter = 0;
 
 Hiscores hiscores;
 
@@ -229,6 +233,7 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
 //update the game state
 int updateGame(){
     framecounter++;
+    ending_counter++;
 
     if (pressJump){
         bobJump();
@@ -471,8 +476,25 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     }
     //next level if we have run out of cheese
     if( game_status == GAME_STATUS_PLAYING && currentLevel.cheeseCount == 0 ){
+
+
         level_counter++;
+
+        //end game if we are on final leve..
+        if( level_counter > LEVEL_COUNT ){
+            game_status = GAME_STATUS_ENDING;
+            ending_counter = 0;
+        }
+
+
         currentLevel = makeLevel(level_counter);
+    }
+
+    if( game_status == GAME_STATUS_ENDING ){
+
+        if( ending_counter > ENDING_FRAMES ){
+            game_status = GAME_STATUS_ATTRACT_MODE;
+        }
     }
 
     if( game_status == GAME_STATUS_PLAYING && lives == 0 ){
@@ -550,8 +572,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     }
 
-
-    drawSprite(&bob, &dst_rect);
+    if( game_status != GAME_STATUS_ENDING)
+        drawSprite(&bob, &dst_rect);
 
 
     //do debug text
@@ -565,6 +587,10 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             SDL_SetRenderDrawColor(renderer, 100+framecounter%100, (framecounter+100)%200, (i*20), SDL_ALPHA_OPAQUE);
             SDL_RenderDebugTextFormat(renderer, 280, 170+(i*15), "%i",hiscores.hiscores[i]);
         }
+    }
+
+    if(game_status==GAME_STATUS_ENDING){
+        SDL_RenderDebugTextFormat(renderer, 230, 170, "Congratulations Bob!\nYou Did It!");
     }
 
 
