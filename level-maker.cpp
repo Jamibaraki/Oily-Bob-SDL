@@ -16,7 +16,7 @@ LevelData makeLevel(int level){
         newLevel.cheeses.push_back( createCheese(470,240));
         newLevel.cheeseCount = 3;
 
-        newLevel.enemies.push_back( createEnemy( 470,230,1,2) );
+        newLevel.enemies.push_back( createEnemy( 470,232,1,2) );
 
         //seems in the other version, platform is just used to store a horizontal range for the bee..
         newLevel.enemies.push_back( createEnemy( 150,200,2,50));
@@ -33,8 +33,8 @@ LevelData makeLevel(int level){
         newLevel.cheeses.push_back( createCheese(710,210));
         newLevel.cheeseCount = 3;
 
-        newLevel.enemies.push_back( createEnemy( 250,325,1,0) );
-        newLevel.enemies.push_back( createEnemy( 340,325,1,0,-1) );
+        newLevel.enemies.push_back( createEnemy( 250,333,1,0) );
+        newLevel.enemies.push_back( createEnemy( 340,333,1,0,-1) );
 
 
         break;
@@ -50,7 +50,7 @@ LevelData makeLevel(int level){
         newLevel.cheeses.push_back( createCheese(65,140));
         newLevel.cheeseCount = 2;
 
-        newLevel.enemies.push_back( createEnemy( 380,225,1,2) );
+        newLevel.enemies.push_back( createEnemy( 380,233,1,2) );
         newLevel.enemies.push_back( createEnemy( 280,170,2,50) );
         break;
 
@@ -73,10 +73,10 @@ LevelData makeLevel(int level){
         newLevel.cheeses.push_back( createCheese(940,150));
         newLevel.cheeseCount = 6;
 
-        newLevel.enemies.push_back( createEnemy( 380,325,1,0) );
-        newLevel.enemies.push_back( createEnemy( 130,325,1,0) );
-        newLevel.enemies.push_back( createEnemy( 170,45,1,6,-1) );
-        newLevel.enemies.push_back( createEnemy( 700,45,1,7) );
+        newLevel.enemies.push_back( createEnemy( 380,333,1,0) );
+        newLevel.enemies.push_back( createEnemy( 130,333,1,0) );
+        newLevel.enemies.push_back( createEnemy( 170,53,1,6,-1) );
+        newLevel.enemies.push_back( createEnemy( 700,53,1,7) );
 
 
     }

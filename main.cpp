@@ -30,9 +30,8 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-Hiscore not recording when game completed
+
 suspicious cheese positioning on level 3
-enemy position needs turning for new sprite size
 Die Sound / Audio management
 horizontal movement acceleration
 prevent chain jumping trick?
@@ -67,6 +66,8 @@ get the game working - DONE
 high score table - DONE
 Get game looping or ending at end - DONE
 Get original levels in - DONE
+enemy position needs turning for new sprite size - DONE
+Hiscore not recording when game completed - DONE
 **/
 
 
@@ -491,6 +492,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         if( level_counter > LEVEL_COUNT ){
             game_status = GAME_STATUS_ENDING;
             ending_counter = 0;
+            hiscores.setScore(score);
         }
 
 
