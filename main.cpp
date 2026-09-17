@@ -15,6 +15,8 @@ using namespace std;
 #define GAME_STATUS_PLAYING 1
 #define GAME_STATUS_ENDING 2
 
+#define WORLD_BOUNDARY_LEFT 5
+#define WORLD_BOUNDARY_RIGHT 950
 #define SCROLL_LIMIT_RIGHT 480
 #define SCROLL_LIMIT_LEFT 80
 
@@ -38,7 +40,6 @@ Todo:
 suspicious cheese positioning on level 3
 Die Sound / Audio management
 horizontal movement acceleration
-
 collisions need improvement
 framecounter based anims will glitch when framecounter rolls over
 clean up sprites
@@ -357,6 +358,12 @@ int updateGame(){
         }
 
     }
+
+    //boundary checking
+    if (bob.xPos < WORLD_BOUNDARY_LEFT)
+        bob.xPos =WORLD_BOUNDARY_LEFT;
+    if(bob.xPos > WORLD_BOUNDARY_RIGHT)
+        bob.xPos = WORLD_BOUNDARY_RIGHT;
 
 
     //check if we need to scroll
