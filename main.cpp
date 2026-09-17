@@ -9,10 +9,14 @@ using namespace std;
 #define START_LIVES 3
 #define LEVEL_COUNT 4
 #define ENDING_FRAMES 350
+#define CHEESE_POINTS 100
 
 #define GAME_STATUS_ATTRACT_MODE 0
 #define GAME_STATUS_PLAYING 1
 #define GAME_STATUS_ENDING 2
+
+#define SCROLL_LIMIT_RIGHT 480
+#define SCROLL_LIMIT_LEFT 80
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -34,7 +38,7 @@ Todo:
 suspicious cheese positioning on level 3
 Die Sound / Audio management
 horizontal movement acceleration
-prevent chain jumping trick?
+
 collisions need improvement
 framecounter based anims will glitch when framecounter rolls over
 clean up sprites
@@ -68,6 +72,7 @@ Get game looping or ending at end - DONE
 Get original levels in - DONE
 enemy position needs turning for new sprite size - DONE
 Hiscore not recording when game completed - DONE
+prevent chain jumping trick? - DONE
 **/
 
 
@@ -304,10 +309,10 @@ int updateGame(){
     bobYCollision = false;
     if (jumpPeak == true) {
         for( Platform p : currentLevel.platforms){
+                //again, some magic numbers from original game, but seems to work.
             if((bob.xPos - p.xPos > -35) && ((bob.xPos+50) - (p.xPos + (PLATFORM_BLOCK_WIDTH*p.width)) < 35)) {
-                //presumably 130 is bobs height..
                 if((bob.yPos+bob.height - p.yPos ) > (-bob.ySpeed +2) && (bob.yPos+bob.height-bob.ySpeed-1) - p.yPos < 0) {
-                    //detected a Y collision
+
                      bob.yPos = p.yPos-bob.height;
                      bobYCollision = true;
                      bob.ySpeed = 5;
@@ -321,12 +326,12 @@ int updateGame(){
 
     //cheese collision detection
     for( Cheese& c : currentLevel.cheeses ) {
-        //check if we hit a cheese
         if( c.status == true ) {
+            //magic numbers from the original game, but seem to work OK for collision feel
             if(c.xPos - bob.xPos > -70 && c.xPos - bob.xPos < 50) {
                 if(c.yPos - bob.yPos < bob.height && c.yPos - bob.yPos > -63) {
                     c.status = false;
-                    score += 100;
+                    score += CHEESE_POINTS;
                     currentLevel.cheeseCount --;
 
                 }
@@ -355,10 +360,10 @@ int updateGame(){
 
 
     //check if we need to scroll
-    if(bob.xPos - scrollOffsetX > 480 && bobVector > 0)
+    if(bob.xPos - scrollOffsetX > SCROLL_LIMIT_RIGHT && bobVector > 0)
         scrollOffsetX += bobVector;
 
-    if(bob.xPos - scrollOffsetX < 80 && bobVector < 0)
+    if(bob.xPos - scrollOffsetX < SCROLL_LIMIT_LEFT && bobVector < 0)
         scrollOffsetX += bobVector; //which will be negative
 
     if (scrollOffsetX < 0)
