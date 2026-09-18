@@ -91,6 +91,9 @@ static SDL_AudioStream *stream = NULL;
 static Uint8 *wav_data = NULL;
 static Uint32 wav_data_len = 0;
 
+static Uint8 *sound_die = NULL;
+static Uint32 sound_die_len = 0;
+
 
 //various game entity types
 Entity bee;
@@ -167,6 +170,15 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     /* Load the .wav  */
     SDL_asprintf(&wav_path, "%ssound/jump.wav", SDL_GetBasePath());
     if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
+        SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    SDL_free(wav_path);  /* done with this string. */
+
+    /* Load the second wav  */
+    SDL_asprintf(&wav_path, "%ssound/ow.wav", SDL_GetBasePath());
+    if (!SDL_LoadWAV(wav_path, &spec, &sound_die, &sound_die_len)) {
         SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -390,6 +402,10 @@ void bobDie(){
     jumpPeak=false;
     scrollOffsetX=0;
     bob.yPos = Ground;
+    //might be better to kill existing sound here replacing jump with die
+    if (SDL_GetAudioStreamQueued(stream) == 0) {
+        SDL_PutAudioStreamData(stream, sound_die, sound_die_len);
+    }
 }
 
 
