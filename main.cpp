@@ -37,7 +37,6 @@ Conversion of my Allegro platform game to SDL
 Todo:
 
 
-suspicious cheese positioning on level 3
 Die Sound / Audio management
 horizontal movement acceleration
 collisions need improvement
@@ -74,6 +73,7 @@ Get original levels in - DONE
 enemy position needs turning for new sprite size - DONE
 Hiscore not recording when game completed - DONE
 prevent chain jumping trick? - DONE
+suspicious cheese positioning on level 3 - DONE
 **/
 
 
@@ -509,6 +509,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 
         currentLevel = makeLevel(level_counter);
+        bob.xPos = 100; bob.yPos = Ground;  scrollOffsetX=0;
     }
 
     if( game_status == GAME_STATUS_ENDING ){

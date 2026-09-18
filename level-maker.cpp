@@ -28,7 +28,7 @@ LevelData makeLevel(int level){
         newLevel.platforms.push_back( createPlatform( 480,270,2 ) );
         newLevel.platforms.push_back( createPlatform( 700,270,2 ) );
 
-        newLevel.cheeses.push_back( createCheese(205,335));
+        newLevel.cheeses.push_back( createCheese(205,343));
         newLevel.cheeses.push_back( createCheese(485,210));
         newLevel.cheeses.push_back( createCheese(710,210));
         newLevel.cheeseCount = 3;
