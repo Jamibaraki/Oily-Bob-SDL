@@ -20,6 +20,8 @@ using namespace std;
 #define SCROLL_LIMIT_RIGHT 480
 #define SCROLL_LIMIT_LEFT 80
 
+#define BOB_MAX_SPEED 5
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
@@ -36,9 +38,6 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-
-Die Sound / Audio management
-horizontal movement acceleration
 collisions need improvement
 framecounter based anims will glitch when framecounter rolls over
 clean up sprites
@@ -74,6 +73,8 @@ enemy position needs turning for new sprite size - DONE
 Hiscore not recording when game completed - DONE
 prevent chain jumping trick? - DONE
 suspicious cheese positioning on level 3 - DONE
+Die Sound / Audio management - DONE
+horizontal movement acceleration - DONE
 **/
 
 
@@ -213,7 +214,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     bob.xPos=250;
     bob.yPos = 350;
     bob.direction = 0;
-    bob.speed = 3;
+    bob.speed = 0;
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -275,23 +276,29 @@ int updateGame(){
         jumpPeak = false;
     }
 
-
-    //animate the bee. Eventually generalize to all sprites
-    /*
-    bee.xPos += (bee.speed * bee.direction);
-    if(bee.xPos>bee.rBound){
-        bee.direction = -1;
-        bee.xPos-=bee.width/2;
+    //slow Bob down gradually when not moving, every 3rd frame.
+    if(fmod(framecounter,-3)==0 && bob.direction == 0){
+        if(bob.speed>0){
+            bob.speed--;
+        }
+        if(bob.speed<0){
+            bob.speed++;
+        }
     }
-    if (bee.xPos<bee.lBound){
-        bee.direction = 1;
-        bee.xPos+=bee.width/2;
-    }
-    */
 
-    bob.xPos += bob.speed * bob.direction;
+
+    bob.speed += bob.direction;
+    bob.xPos += bob.speed;
+    if(bob.speed > BOB_MAX_SPEED){
+        bob.speed = BOB_MAX_SPEED;
+    }
+    if(bob.speed < -BOB_MAX_SPEED){
+        bob.speed = -BOB_MAX_SPEED;
+    }
+
     bob.yPos += bob.ySpeed;
-    int bobVector = bob.speed * bob.direction;
+
+
 
     //move enemies (then remove above..
     for( Enemy& e : currentLevel.enemies ){
@@ -379,11 +386,11 @@ int updateGame(){
 
 
     //check if we need to scroll
-    if(bob.xPos - scrollOffsetX > SCROLL_LIMIT_RIGHT && bobVector > 0)
-        scrollOffsetX += bobVector;
+    if(bob.xPos - scrollOffsetX > SCROLL_LIMIT_RIGHT && bob.speed > 0)
+        scrollOffsetX += bob.speed;
 
-    if(bob.xPos - scrollOffsetX < SCROLL_LIMIT_LEFT && bobVector < 0)
-        scrollOffsetX += bobVector; //which will be negative
+    if(bob.xPos - scrollOffsetX < SCROLL_LIMIT_LEFT && bob.speed < 0)
+        scrollOffsetX += bob.speed; //which will be negative
 
     if (scrollOffsetX < 0)
         scrollOffsetX = 0;
