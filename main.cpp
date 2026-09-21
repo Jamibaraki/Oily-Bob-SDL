@@ -41,10 +41,6 @@ Conversion of my Allegro platform game to SDL
 
 Todo:
 
-collisions need improvement
-framecounter based anims will glitch when framecounter rolls over
-clean up sprites
-
 platforms displaying - DONE
 get a sprite displaying - DONE
 get keyboard also controlling bob - DONE
@@ -78,6 +74,9 @@ prevent chain jumping trick? - DONE
 suspicious cheese positioning on level 3 - DONE
 Die Sound / Audio management - DONE
 horizontal movement acceleration - DONE
+clean up sprites - DONE
+framecounter based anims will glitch when framecounter rolls over - DONE (but will still happen after estimated 800 days of solid play!)
+collisions need improvement - DONE
 **/
 
 
@@ -207,17 +206,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     createEntity(&cheese,"cheese.bmp");
     createEntity(&alien,"enemy.bmp");
     createEntity(&platform,"platform.bmp");
-    bee.xPos = 100;
-    bee.yPos = 50;
-    bee.speed = 2;
-    bee.direction = 1;
-    bee.lBound = 50;
-    bee.rBound = 220;
+
 
     bob.xPos=250;
     bob.yPos = 350;
-    bob.direction = 0;
-    bob.speed = 0;
+
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -266,7 +259,7 @@ int updateGame(){
         bobJump();
     } else if (bob.yPos < Ground){jumpPeak = true;}
 
-    //do all the jump tracking. remember in other version -= yspeed to sprite. trying to flip!!
+    //do all the jump tracking. remember in other version -= yspeed to sprite. Flipped here.
     if(bob.ySpeed < -11)
          jumpPeak = true;
 
@@ -302,12 +295,11 @@ int updateGame(){
     bob.yPos += bob.ySpeed;
 
 
-
-    //move enemies (then remove above..
+    //move enemies
     for( Enemy& e : currentLevel.enemies ){
         e.xPos += enemySpeed * e.direction;
         switch(e.type){
-            case 1:
+            case 1: //alien
             if( ( e.xPos+enemySpeed ) < ( currentLevel.platforms[e.platform].xPos  ) ){
                e.direction = 1;
             }
@@ -316,13 +308,12 @@ int updateGame(){
                 e.direction = -1;
             }
             break;
-            case 2:
+            case 2: //bee
                 if(fmod( framecounter, -1*e.platform ) ==0)
                     e.direction *= -1;
             break;
 
         }
-    //type 2 is the alien, 2 is the bee..
 
     }
 
@@ -332,7 +323,8 @@ int updateGame(){
     bobYCollision = false;
     if (jumpPeak == true) {
         for( Platform p : currentLevel.platforms){
-                //again, some magic numbers from original game, but seems to work.
+                //again, some magic numbers from original game, but seems to work after tuning.
+                //Bob's legs are well inside sprite so makes sense not to use sprite width
             if((bob.xPos - p.xPos > -35) && ((bob.xPos+50) - (p.xPos + (PLATFORM_BLOCK_WIDTH*p.width)) < 35)) {
                 if((bob.yPos+bob.height - p.yPos ) > (-bob.ySpeed +2) && (bob.yPos+bob.height-bob.ySpeed-1) - p.yPos < 0) {
 
@@ -401,18 +393,16 @@ int updateGame(){
         scrollOffsetX = 360;
 
 
-
-
 }
 
 void bobDie(){
-    //die sound
     lives --;
     bob.xPos = 50;
     jumpPeak=false;
     scrollOffsetX=0;
     bob.yPos = Ground;
-    //might be better to kill existing sound here replacing jump with die
+    //might be better to kill existing sound here, replacing jump with die
+    //currently only plays if other sounds not playing
     if (SDL_GetAudioStreamQueued(stream) == 0) {
         SDL_PutAudioStreamData(stream, sound_die, sound_die_len);
     }
@@ -423,7 +413,7 @@ void bobJump(){
 
     if (!jumpPeak){
 
-        //set this to zero so it just adds the sample if there's nothing already playing
+        //adds the sample if there's nothing already playing
         if (SDL_GetAudioStreamQueued(stream) == 0) {
             SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
         }
@@ -471,7 +461,6 @@ static SDL_AppResult handle_key_event_(SDL_Keycode key_code, int isDown)
 static SDL_AppResult handle_joypad_event_(int button, int isDown){
 
     string input_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)button);
-    //SDL_Log( "input %s" ,input_name.c_str() );
     if( input_name == "dpright" ){
         bob.direction = isDown;
     } else if (input_name == "dpleft" ){
@@ -519,10 +508,9 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         game_status = GAME_STATUS_PLAYING;
 
     }
+
     //next level if we have run out of cheese
     if( game_status == GAME_STATUS_PLAYING && currentLevel.cheeseCount == 0 ){
-
-
         level_counter++;
         bob.xPos = 50;
         scrollOffsetX = 0;
@@ -533,11 +521,11 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             hiscores.setScore(score);
         }
 
-
         currentLevel = makeLevel(level_counter);
         bob.xPos = 100; bob.yPos = Ground;  scrollOffsetX=0;
     }
 
+    //checking the countdown before flipping to attract mode after ending the game
     if( game_status == GAME_STATUS_ENDING ){
 
         if( ending_counter > ENDING_FRAMES ){
@@ -545,6 +533,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         }
     }
 
+    //end game after dying
     if( game_status == GAME_STATUS_PLAYING && lives == 0 ){
         //we're dead! game over
         game_status = GAME_STATUS_ATTRACT_MODE;
@@ -559,26 +548,20 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     const double now = ((double)SDL_GetTicks());
     SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE_FLOAT);  /* new color, full alpha. */
 
-    //think this looks glitchy, should use floats to smooth out the blips
+    //could use floats to smooth things a little more
     const int ticks_per_frame = 16; // roughly 60 fps
 
-    //calculate the frames and lets put the actual game updates in a separate function for clarity
+    //calculate the ticks since last called and does required number of updates
     while ( now > last_step + ticks_per_frame ){
         updateGame();
         last_step += ticks_per_frame;
     }
 
 
-
-    // the rendering doesn't need to be repeated. That would be silly.
-
-    //rendering does however need to be functionalized, as it is already quite silly
-
     /* clear the window to the draw color. */
     SDL_RenderClear(renderer);
 
     drawSprite(&background,&dst_rect);
-
 
     //draw cheeses
     for( Cheese c : currentLevel.cheeses ){
@@ -587,7 +570,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             cheese.yPos = c.yPos;
             drawSprite(&cheese,&dst_rect);
         }
-
     }
 
     //draw platforms
@@ -599,11 +581,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         }
     }
 
-
-
     //draw enemies
     for( Enemy e : currentLevel.enemies ){
-
         switch( e.type ){
         case 1:
             alien.xPos = e.xPos;
@@ -615,20 +594,18 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             bee.yPos = e.yPos;
             drawSprite(&bee,&dst_rect, e.direction);
             break;
-
         }
-
     }
 
     if( game_status != GAME_STATUS_ENDING)
         drawSprite(&bob, &dst_rect);
 
-
-    //do debug text
+    //do text
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderDebugTextFormat(renderer, 250, 15, "Score: %i",score);
     SDL_RenderDebugTextFormat(renderer, 10, 15, "Lives: %i",lives);
 
+    //state specific draws..
     if(game_status==GAME_STATUS_ATTRACT_MODE){
         SDL_RenderDebugTextFormat(renderer, 200, 150, "Hiscores:");
         for(int i=0;i<10;i++){
@@ -642,10 +619,10 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     }
 
 
-    /* put the newly-cleared rendering on the screen. */
+    /* put the finished frame on the screen. */
     SDL_RenderPresent(renderer);
 
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
+    return SDL_APP_CONTINUE;  /* carry on! */
 }
 
 void drawSprite(Entity *entity, SDL_FRect *rect,int flipped ){
@@ -675,22 +652,24 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 
 bool checkCollision( SDL_Rect a, SDL_Rect b )
 {
-    if( a.x >= b.x + b.w )
+    int LEEWAY = 10; // makes collisions a bit less likely
+
+    if( a.x - LEEWAY >= b.x + b.w )
     {
         return false;
     }
 
-    if( a.x + a.w <= b.x )
+    if( a.x + a.w <= b.x + LEEWAY )
     {
         return false;
     }
 
-    if( a.y >= b.y+b.h )
+    if( a.y + LEEWAY >= b.y+b.h )
     {
         return false;
     }
 
-    if( a.y + a.h <= b.y )
+    if( a.y + a.h <= b.y + LEEWAY )
     {
         return false;
     }
