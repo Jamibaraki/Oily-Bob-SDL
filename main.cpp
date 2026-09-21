@@ -11,6 +11,9 @@ using namespace std;
 #define ENDING_FRAMES 350
 #define CHEESE_POINTS 100
 
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+
 #define GAME_STATUS_ATTRACT_MODE 0
 #define GAME_STATUS_PLAYING 1
 #define GAME_STATUS_ENDING 2
@@ -160,12 +163,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 
     //fullscreen or windowed
-    if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-    //if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", 640, 480, SDL_WINDOW_FULLSCREEN, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    //if (!SDL_CreateWindowAndRenderer("jamibaraki/oilybob", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    SDL_SetRenderLogicalPresentation(renderer, 640, 480, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    SDL_SetRenderLogicalPresentation(renderer, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
 
     /* Load the .wav  */
