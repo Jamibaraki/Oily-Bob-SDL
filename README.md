@@ -2,7 +2,7 @@
 
 Oily Bob is a bright, cheerful platform game using C++ and SDL 3.  
 
-It's a very simple platform game. Gather the cheese to progress to the next level, and dodge the bad guys.  
+It's a very simple game. Gather the cheese to progress to the next level, and dodge the bad guys.  
 
 ### Controls  
 
@@ -42,11 +42,11 @@ g++ *.cpp -o oily-bob -lSDL3
 
 Runs by opening the .exe file.
 
-Requires SDL3.dll in the runtime folder, along with the **contents** of the asset folder, so the runtime folder with contain:
-* the exe
+Requires SDL3.dll in the runtime folder, along with the **contents** of the asset folder, so the runtime folder will contain:
+* the .exe
 * SDL3.dll
-* graphics folder, containing the graphics
-* sound folder, containing the sounds
+* a graphics folder, containing the graphics
+* a sound folder, containing the sounds
 
 ### Feature List
 
