@@ -85,14 +85,14 @@ collisions need improvement - DONE
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
-static SDL_Texture *texture = NULL;
+
 
 Uint64 last_step; // for getting animations timed right.
 
 //audio
 static SDL_AudioStream *stream = NULL;
-static Uint8 *wav_data = NULL;
-static Uint32 wav_data_len = 0;
+static Uint8 *sound_jump = NULL;
+static Uint32 sound_jump_len = 0;
 
 static Uint8 *sound_die = NULL;
 static Uint32 sound_die_len = 0;
@@ -172,7 +172,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     /* Load the .wav  */
     SDL_asprintf(&wav_path, "%ssound/jump.wav", SDL_GetBasePath());
-    if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
+    if (!SDL_LoadWAV(wav_path, &spec, &sound_jump, &sound_jump_len)) {
         SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -309,8 +309,12 @@ int updateGame(){
             }
             break;
             case 2: //bee
-                if(fmod( framecounter, -1*e.platform ) ==0)
+                int interval = e.platform;
+                if (interval < 1) interval = 60;
+
+                if (framecounter % interval == 0) {
                     e.direction *= -1;
+                }
             break;
 
         }
@@ -415,7 +419,7 @@ void bobJump(){
 
         //adds the sample if there's nothing already playing
         if (SDL_GetAudioStreamQueued(stream) == 0) {
-            SDL_PutAudioStreamData(stream, wav_data, wav_data_len);
+            SDL_PutAudioStreamData(stream, sound_jump, sound_jump_len);
         }
 
         bob.ySpeed-=2;
@@ -505,6 +509,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         currentLevel = makeLevel(level_counter);
         score = 0;
         lives = START_LIVES;
+        framecounter = 0;
         game_status = GAME_STATUS_PLAYING;
 
     }
@@ -522,6 +527,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         }
 
         currentLevel = makeLevel(level_counter);
+        framecounter = 0;
         bob.xPos = 100; bob.yPos = Ground;  scrollOffsetX=0;
     }
 
@@ -592,7 +598,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         case 2:
             bee.xPos = e.xPos;
             bee.yPos = e.yPos;
-            drawSprite(&bee,&dst_rect, e.direction);
+            drawSprite(&bee,&dst_rect, -e.direction);
             break;
         }
     }
@@ -625,28 +631,33 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     return SDL_APP_CONTINUE;  /* carry on! */
 }
 
-void drawSprite(Entity *entity, SDL_FRect *rect,int flipped ){
+void drawSprite(Entity *entity, SDL_FRect *rect,int direction ){
     rect->x = entity->xPos-scrollOffsetX;
     rect->y = entity->yPos;
     rect->w = (float) entity->width;
     rect->h = (float) entity->height;
 
-    if (flipped == 1 ){
-        rect->w *= -1;
-    }
-
-    SDL_RenderTexture(renderer, entity->texture, NULL, rect);
+    SDL_FlipMode flip = (direction < 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+    SDL_RenderTextureRotated(renderer, entity->texture, NULL, rect, 0.0, NULL, flip);
 
 }
 
 /* This function runs once at shutdown. */
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
-    SDL_DestroyTexture(texture);
-    SDL_DestroyTexture(bee.texture); //not sure if both are needed!
-    SDL_DestroyTexture(background.texture);
-    SDL_DestroyTexture(bob.texture);
-    SDL_free(wav_data);
+    if(bee.texture) SDL_DestroyTexture(bee.texture);
+    if(background.texture) SDL_DestroyTexture(background.texture);
+    if(bob.texture) SDL_DestroyTexture(bob.texture);
+    if(cheese.texture) SDL_DestroyTexture(cheese.texture);
+    if(alien.texture) SDL_DestroyTexture(alien.texture);
+    if(platform.texture) SDL_DestroyTexture(platform.texture);
+    SDL_free(sound_jump);
+    SDL_free(sound_die);
+
+    if(stream){
+        SDL_DestroyAudioStream(stream);
+    }
+
     /* SDL will clean up the window/renderer for us. */
 }
 
