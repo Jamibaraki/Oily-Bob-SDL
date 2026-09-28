@@ -247,6 +247,7 @@ int createEntity( Entity *entity, const std::string& graphic_name ){
     }
 
     SDL_DestroySurface(surface);
+    return 0;
 
 }
 
@@ -273,7 +274,7 @@ int updateGame(){
     }
 
     //slow Bob down gradually when not moving, every 3rd frame.
-    if(fmod(framecounter,-3)==0 && bob.direction == 0){
+    if(framecounter % 3 == 0 && bob.direction == 0){
         if(bob.speed>0){
             bob.speed--;
         }
@@ -312,7 +313,7 @@ int updateGame(){
                 int interval = e.platform;
                 if (interval < 1) interval = 60;
 
-                if (framecounter % interval == 0) {
+                if (framecounter > 0 && framecounter % interval == 0) {
                     e.direction *= -1;
                 }
             break;
@@ -368,8 +369,19 @@ int updateGame(){
     for( Enemy& e: currentLevel.enemies ){
         b.x = e.xPos;
         b.y = e.yPos;
-        b.h = alien.height;
-        b.w = alien.width;
+        switch(e.type){
+        case 1:
+            b.h = alien.height;
+            b.w = alien.width;
+            break;
+        case 2:
+            b.h = bee.height;
+            b.w = bee.width;
+            break;
+        }
+
+
+
         if( checkCollision(a,b) ){
             bobDie();
             continue;
