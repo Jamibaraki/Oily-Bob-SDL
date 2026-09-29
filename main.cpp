@@ -605,7 +605,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         case 1:
             alien.xPos = e.xPos;
             alien.yPos = e.yPos;
-            drawSprite(&alien,&dst_rect);
+            drawSprite(&alien,&dst_rect, e.direction);
             break;
         case 2:
             bee.xPos = e.xPos;
@@ -615,8 +615,19 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         }
     }
 
+    int bobdirection = bob.direction;
+
+    //draw main character
     if( game_status != GAME_STATUS_ENDING)
-        drawSprite(&bob, &dst_rect);
+
+        if(bob.speed==0){
+            if( framecounter % 30 > 15 ){
+                bobdirection = 1;
+            } else {
+                bobdirection = -1;
+            }
+        }
+        drawSprite(&bob, &dst_rect,bobdirection);
 
     //do text
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
