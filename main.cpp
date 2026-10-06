@@ -633,6 +633,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderDebugTextFormat(renderer, 250, 15, "Score: %i",score);
     SDL_RenderDebugTextFormat(renderer, 10, 15, "Lives: %i",lives);
+    SDL_RenderDebugTextFormat(renderer, 550, 15, "Level: %i",level_counter<LEVEL_COUNT ? level_counter: LEVEL_COUNT);
 
     //state specific draws..
     if(game_status==GAME_STATUS_ATTRACT_MODE){
