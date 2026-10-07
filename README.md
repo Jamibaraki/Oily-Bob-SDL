@@ -33,7 +33,12 @@ Possible future improvements:
 
 Requires **SDL 3**.
 
-**Example (MinGW / g++):**
+**CMake Example**  
+```cmake -B build
+cmake --build build
+```
+
+**Alternative Example (MinGW / g++):**
 ```bash
 g++ *.cpp -o oily-bob -lSDL3
 ```
