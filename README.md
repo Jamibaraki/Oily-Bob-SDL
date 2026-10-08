@@ -1,5 +1,7 @@
 # Oily-Bob-SDL
 
+[![Build](https://github.com/Jamibaraki/Oily-Bob-SDL/actions/workflows/build.yml/badge.svg)](https://github.com/Jamibaraki/Oily-Bob-SDL/actions/workflows/build.yml)
+
 Oily Bob is a bright, cheerful platform game using C++ and SDL 3.  
 
 It's a very simple game. Gather the cheese to progress to the next level, and dodge the bad guys.  
@@ -34,7 +36,8 @@ Possible future improvements:
 Requires **SDL 3**.
 
 **CMake Example**  
-```cmake -B build
+```
+cmake -B build
 cmake --build build
 ```
 
